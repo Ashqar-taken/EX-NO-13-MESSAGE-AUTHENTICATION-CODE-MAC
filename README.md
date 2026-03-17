@@ -25,11 +25,70 @@ To implement MESSAGE AUTHENTICATION CODE(MAC)
 5. Security: The security of the MAC relies on the secret key \( K \) and the strength of the hash function \( H \), ensuring that an attacker cannot forge a valid MAC without knowledge of the key.
 
 ## Program:
+```
+#include <stdio.h>
+#include <string.h>
+
+#define MAC_SIZE 32
+
+// Compute MAC using XOR
+void computeMAC(const char *key, const char *message, unsigned char *mac) {
+    int key_len = strlen(key);
+    int msg_len = strlen(message);
+
+    for (int i = 0; i < MAC_SIZE; i++) {
+        unsigned char k = (unsigned char) key[i % key_len];
+        unsigned char m = (unsigned char) message[i % msg_len];
+        mac[i] = k ^ m;
+    }
+}
+
+int main() {
+    char key[100], message[100];
+    unsigned char mac[MAC_SIZE];
+    unsigned char receivedMAC[MAC_SIZE];
+
+    printf("Enter the secret key: ");
+    scanf("%99s", key);
+
+    printf("Enter the message: ");
+    scanf("%99s", message);
+
+    computeMAC(key, message, mac);
+
+    printf("Computed MAC (in hex): ");
+    for (int i = 0; i < MAC_SIZE; i++) {
+        printf("%02x", mac[i]);
+    }
+    printf("\n");
+
+    // Read hex string
+    printf("Enter the received MAC (as hex): ");
+    char hexInput[2 * MAC_SIZE + 1];
+    scanf("%64s", hexInput);
+
+    // Convert hex string → bytes
+    for (int i = 0; i < MAC_SIZE; i++) {
+        unsigned int byte;
+        sscanf(&hexInput[i * 2], "%2x", &byte);
+        receivedMAC[i] = (unsigned char)byte;
+    }
 
 
+    // Final verification
+    if (memcmp(mac, receivedMAC, MAC_SIZE) == 0) {
+        printf("MAC verification successful. Message is authentic.\n");
+    } else {
+        printf("MAC verification failed. Message is not authentic.\n");
+    }
+
+    return 0;
+}
+```
 
 ## Output:
 
+![alt text](output.png)
 
 ## Result:
 The program is executed successfully.
